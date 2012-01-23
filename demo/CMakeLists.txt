@@ -1,0 +1,7 @@
+add_executable(wsgi wsgi.cpp)
+if(${CMAKE_BUILD_TYPE} STREQUAL "Release")
+  target_link_libraries(wsgi cxxpy ${PYTHON_LIBRARIES})
+else()
+  target_link_libraries(wsgi cxxpy ${PYTHON_DEBUG_LIBRARIES})
+endif()
+add_dependencies(wsgi cxxpy)

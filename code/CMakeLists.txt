@@ -1,0 +1,45 @@
+# cxxpy library.
+
+set(headers
+  Any.hpp
+  Builder.hpp
+  Bytes.hpp
+  Callable.hpp
+  Error.hpp
+  Int.hpp
+  Interpreter.hpp
+  Iterator.hpp
+  Library.hpp
+  List.hpp
+  Map.hpp
+  Module.hpp
+  None.hpp
+  Object.hpp
+  String.hpp
+  Tuple.hpp
+  Type.hpp
+)
+set(sources
+  Any.cpp
+  Builder.cpp
+  Bytes.cpp
+  Callable.cpp
+  Error.cpp
+  Int.cpp
+  Interpreter.cpp
+  Iterator.cpp
+  Library.cpp
+  List.cpp
+  Map.cpp
+  Module.cpp
+  None.cpp
+  Object.cpp
+  String.cpp
+  Tuple.cpp
+  Type.cpp
+)
+add_library(cxxpy
+  STATIC
+  ${sources}
+  ${headers}
+)
