@@ -2,6 +2,7 @@
 
 set(headers
   Any.hpp
+  Bool.hpp
   Builder.hpp
   Bytes.hpp
   Callable.hpp
@@ -21,6 +22,7 @@ set(headers
 )
 set(sources
   Any.cpp
+  Bool.cpp
   Builder.cpp
   Bytes.cpp
   Callable.cpp

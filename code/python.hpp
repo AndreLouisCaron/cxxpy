@@ -16,6 +16,7 @@
  */
 
 #include "Any.hpp"
+#include "Bool.hpp"
 #include "Builder.hpp"
 #include "Bytes.hpp"
 #include "Callable.hpp"
