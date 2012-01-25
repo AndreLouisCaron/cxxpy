@@ -14,6 +14,7 @@
 
 #include "python.hpp"
 #include <iostream>
+#include <sstream>
 
 namespace wsgi {
 
@@ -173,7 +174,7 @@ namespace wsgi {
         {
               // Send status line.
             myStream
-                << "HTTP/1.1" << status << "\r\n";
+                << "HTTP/1.1 " << status << "\r\n";
             bool contentlength = false;
               // Send headers.
             for ( py::ssize_t i = 0; (i < headers.size()); ++i )
@@ -202,30 +203,102 @@ namespace wsgi {
 
 namespace exports {
 
-    int __init__ ( py::Object self, py::Tuple args, py::Map kwds )
+    int init ( py::Object self, py::Tuple args, py::Map kwds )
     {
         return (0);
     }
 
     py::Object read ( py::Object self, py::Tuple args )
+    try
     {
+        std::istream& stream = *static_cast<std::istream*>
+            (py::TypeBuilder::get_baton(self));
+        std::ostringstream payload;
         if ( args.size() == 1 )
         {
-            // integer with number of bytes...
+            char data[1024];
+            long size = py::Int(args[0]);
+            for (; (size > 0); size -= stream.gcount()) {
+                stream.read(data, std::min(size, long(sizeof(data))));
+                payload.write(data, stream.gcount());
+            }
         }
+        else {
+            payload << stream.rdbuf();
+        }
+        return (py::Bytes(payload.str()));
+    }
+    catch ( const std::bad_cast& )
+    {
+        std::cerr << "Bad cast!" << std::endl;
         return (py::None());
     }
 
     py::Object readline ( py::Object self )
     {
-        return (py::None());
+        std::istream& stream = *static_cast<std::istream*>
+            (py::TypeBuilder::get_baton(self));
+        std::string line;
+        if (!std::getline(stream,line)) {
+            return (py::None());
+        }
+        return (py::Bytes(line));
     }
 
     py::Object readlines ( py::Object self, py::Tuple args )
     {
-        if ( args.size() == 1 )
+        std::istream& stream = *static_cast<std::istream*>
+            (py::TypeBuilder::get_baton(self));
+        py::List lines;
+        for (std::string line; (std::getline(stream,line));) {
+            lines.append(py::Bytes(line));
+        }
+        return (lines);
+    }
+
+    py::Object iter ( py::Object self )
+    {
+        return (self);
+    }
+
+    py::Object next ( py::Object self )
+    {
+        const py::Object line = readline(self);
+        if (line.handle() == py::none.handle()) {
+            return (py::Object());
+        }
+        return (line);
+    }
+
+    py::Object flush ( py::Object self )
+    {
+        std::ostream& stream = *static_cast<std::ostream*>
+            (py::TypeBuilder::get_baton(self));
+        stream << std::flush;
+        return (py::None());
+    }
+
+    py::Object write ( py::Object self, py::Tuple args )
+    {
+        std::ostream& stream = *static_cast<std::ostream*>
+            (py::TypeBuilder::get_baton(self));
+        if (args.size() == 1)
         {
-            // integer with number of bytes...
+            stream << (std::string)py::Bytes(args[0]);
+        }
+        return (py::None());
+    }
+
+    py::Object writelines ( py::Object self, py::Tuple args )
+    {
+        std::ostream& stream = *static_cast<std::ostream*>
+            (py::TypeBuilder::get_baton(self));
+        if (args.size() == 1)
+        {
+            py::Iterator iterator(args[0]);
+            while (iterator.next()) {
+                stream << (std::string)py::Bytes(iterator.item());
+            }
         }
         return (py::None());
     }
@@ -238,12 +311,33 @@ try
     // Prepare the interpreter.a
     const py::Library library;
 
-    // Export class to Python.
-    py::TypeBuilder type("Export");
-    type.init(py::ctor<&exports::__init__>());
-    type.add(py::Method("read", py::vararg<&exports::read>()));
-    type.finish();
-    py::Object instance = type();
+    // Build input stream class for 'wsgi.input' object.
+    py::TypeBuilder itype("istream");
+    itype.init(py::ctor<&exports::init>());
+    itype.add(py::Method("read", py::vararg<&exports::read>()));
+    itype.add(py::Method("readline", py::noargs<&exports::readline>()));
+    itype.add(py::Method("readlines", py::vararg<&exports::readlines>()));
+    itype.iterable(py::noargs<&exports::iter>(),
+                  py::noargs<&exports::next>());
+    itype.finish();
+
+    // Have 'wsgi.input' object read from standard input stream.
+    py::Object istream = itype();
+    py::TypeBuilder::set_baton
+        (istream, static_cast<std::istream*>(&std::cin));
+
+    // Build output stream class for 'wsgi.errors' object.
+    py::TypeBuilder otype("ostream");
+    otype.init(py::ctor<&exports::init>());
+    otype.add(py::Method("flush", py::noargs<&exports::flush>()));
+    otype.add(py::Method("write", py::vararg<&exports::write>()));
+    otype.add(py::Method("writelines", py::vararg<&exports::writelines>()));
+    otype.finish();
+
+    // Have 'wsgi.errors' object write to standard output stream.
+    py::Object ostream = otype();
+    py::TypeBuilder::set_baton
+        (ostream, static_cast<std::ostream*>(&std::cout));
 
     // WSGI bootstrap code.
     wsgi::Runner execute("wsgi-bootstrap.py");
@@ -252,9 +346,9 @@ try
 
     // Prepare application execution context.
     py::Map environment;
-#if 0
     // Required CGI-style variables.
-    environment.put("REQUEST_METHOD", "");  // "GET", "POST", ...
+    environment.put("REQUEST_METHOD", "GET");  // "GET", "POST", ...
+#if 0
     environment.put("SCRIPT_NAME", "");     // Path to application script.
     environment.put("PATH_INFO", "");       // URL delegated to application.
     environment.put("QUERY_STRING", "");    // URL query string.
@@ -264,20 +358,23 @@ try
     // Optional CGI-style variables.
     environment.put("CONTENT_TYPE", "");
     environment.put("CONTENT_LENGTH", "");
+#endif
+#if 0
     // HTTP headers.
     environment.put("HTTP_HOST", "");
-    //environment.put("", "");
+    //environment.put(...);
+#endif
     // WSGI variables.
-    environment.put("wsgi.version", "");      // tuple(1, 0)
-    environment.put("wsgi.url_scheme", "");   // "http" or "https"
-#endif
-    environment.put("wsgi.input", instance);  // file-like object.
-#if 0
-    environment.put("wsgi.errors", "");       // file-like object.
-    environment.put("wsgi.multithread", "");  // boolean
-    environment.put("wsgi.multiprocess", ""); // boolean
-    environment.put("wsgi.run_once", "");     // boolean
-#endif
+    py::Tuple version(2);
+    version[0] = py::Int(1);
+    version[1] = py::Int(0);
+    environment.put("wsgi.version", version);
+    environment.put("wsgi.url_scheme", "http");
+    environment.put("wsgi.input", istream);
+    environment.put("wsgi.errors", ostream);
+    environment.put("wsgi.multithread", py::False());
+    environment.put("wsgi.multiprocess", py::False());
+    environment.put("wsgi.run_once", py::True());
 
     // Execute application and print HTTP response to "cout".
     wsgi::http_response(execute(application, environment),
