@@ -78,9 +78,9 @@ namespace py {
         return (::PyTuple_Size(handle()));
     }
 
-    Object Tuple::operator[] ( size_type i ) const
+    Any Tuple::operator[] ( size_type i ) const
     {
-        return (Object(::fetch(handle(), i)));
+        return (Any(::fetch(handle(), i)));
     }
 
     Tuple::Proxy Tuple::operator[] ( size_type i )
@@ -99,9 +99,9 @@ namespace py {
         return (*this);
     }
 
-    Tuple::Proxy::operator py::Object () const
+    Tuple::Proxy::operator Any () const
     {
-        return (Object(::fetch(myTuple->handle(), myIndex)));
+        return (Any(::fetch(myTuple->handle(), myIndex)));
     }
 
 }

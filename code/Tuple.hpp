@@ -42,7 +42,7 @@ namespace py {
 
         /* operators. */
     public:
-        Object operator[] ( size_type index ) const;
+        Any operator[] ( size_type index ) const;
         Proxy operator[] ( size_type index );
     };
 
@@ -60,7 +60,7 @@ namespace py {
         /* operators. */
     public:
         Proxy& operator= ( const Object& object );
-        operator py::Object () const;
+        operator Any () const;
     };
 
 }
