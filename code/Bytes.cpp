@@ -36,19 +36,24 @@ namespace {
 
 namespace py {
 
+    bool Bytes::isa ( Handle handle, bool exact )
+    {
+        return (exact? PyString_CheckExact(handle)
+                     : PyString_Check     (handle));
+    }
+
     bool Bytes::isa ( const Object& object, bool exact )
     {
-        return (exact? PyString_CheckExact(object.handle())
-                     : PyString_Check     (object.handle()));
+        return (isa(object.handle(), exact));
     }
 
     Bytes::Bytes ( const Object& object )
-        : Object(object)
+        : Object(check<Bytes>(object.handle()), Object::share())
     {
     }
 
     Bytes::Bytes ( Handle handle, Transfer transfer )
-        : Object(handle, transfer)
+        : Object(check<Bytes>(handle), transfer)
     {
     }
 

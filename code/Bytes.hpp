@@ -30,6 +30,7 @@ namespace py {
 
         /* class methods. */
     public:
+        static bool isa ( Handle handle, bool exact=false );
         static bool isa ( const Object& object, bool exact=false );
 
         /* construction. */
