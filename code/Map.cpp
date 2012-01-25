@@ -102,6 +102,11 @@ namespace py {
         }
     }
 
+    void Map::put ( const std::string& key, const std::string& value )
+    {
+        put(key, py::Bytes(value));
+    }
+
     void Map::del ( const Object& key )
     {
         const int result = ::PyDict_DelItem(handle(), key.handle());

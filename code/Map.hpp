@@ -37,6 +37,7 @@ namespace py {
         Object get ( const Object& key, const Object& fallback ) const;
         void put ( const Object& key, const Object& value );
         void put ( const std::string& key, const Object& value );
+        void put ( const std::string& key, const std::string& value );
         void del ( const Object& key );
         void del ( const std::string& key );
 
