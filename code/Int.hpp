@@ -15,13 +15,28 @@ namespace py {
 
       /*!
        * @brief Fixed-length integer type.
+       *
+       * @see http://docs.python.org/c-api/int.html
        */
     class Int :
         public Object
     {
+        /* class methods. */
+    public:
+        static bool isa ( Handle handle, bool exact=false );
+        static bool isa ( const Object& object, bool exact=false );
+
         /* construction. */
     public:
-        Int ( long value=0 );
+        Int ( int value=0 );
+        Int ( long value );
+
+        explicit Int ( Handle handle );
+        explicit Int ( const Object& object );
+
+        /* operators. */
+    public:
+        operator long () const;
     };
 
 }

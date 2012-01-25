@@ -22,9 +22,41 @@ namespace {
 
 namespace py {
 
+    bool Int::isa ( Handle handle, bool exact )
+    {
+        return (exact? PyInt_CheckExact(handle)
+                     : PyInt_Check     (handle));
+    }
+
+    bool Int::isa ( const Object& object, bool exact )
+    {
+        return (exact? PyInt_CheckExact(object.handle())
+                     : PyInt_Check     (object.handle()));
+    }
+
+    Int::Int ( int value )
+        : Object(::allocate(static_cast<long>(value)))
+    {
+    }
+
     Int::Int ( long value )
         : Object(::allocate(value))
     {
+    }
+
+    Int::Int ( Handle handle )
+        : Object(check<Int>(handle), Object::share())
+    {
+    }
+
+    Int::Int ( const Object& object )
+        : Object(check<Int>(object.handle()))
+    {
+    }
+
+    Int::operator long () const
+    {
+        return PyInt_AS_LONG(handle());
     }
 
 }
