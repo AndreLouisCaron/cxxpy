@@ -45,6 +45,12 @@ namespace py {
         return (T(check<T>(handle())));
     }
 
+    template<typename T>
+    T cast ( const Any& object )
+    {
+        return (object.cast<T>());
+    }
+
 }
 
 #endif /* _py_Any_hpp__ */
