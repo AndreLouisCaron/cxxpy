@@ -9,6 +9,7 @@
 // "http://www.opensource.org/licenses/mit".
 
 #include <python.h>
+#include <typeinfo>
 
 namespace py {
 
