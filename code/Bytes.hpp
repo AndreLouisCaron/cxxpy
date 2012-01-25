@@ -17,9 +17,11 @@ namespace py {
 
     class String;
 
-      /*!
-       * @brief Encoded string (byte string).
-       */
+    /*!
+     * @brief Encoded string (byte string).
+     *
+     * @see http://docs.python.org/c-api/string.html
+     */
     class Bytes :
         public Object
     {
@@ -43,41 +45,41 @@ namespace py {
 
         /* methods. */
     public:
-          /*!
-           * @brief Obtain the length of the string, in bytes.
-           */
+        /*!
+         * @brief Obtain the length of the string, in bytes.
+         */
         size_type size () const;
 
-          /*!
-           * @brief Obtain a pointer to the bytes in the string.
-           */
+        /*!
+         * @brief Obtain a pointer to the bytes in the string.
+         */
         const char_type * data () const;
 
-          /*!
-           * @brief Decodes series of bytes to string.
-           */
+        /*!
+         * @brief Decodes series of bytes to string.
+         */
         const String decode ( const std::string& encoding ) const;
 
         /* operators. */
     public:
         Bytes& operator= ( const Bytes& rhs );
 
-          /*!
-           * @brief Obtain standard string for compatibility with other code.
-           * @warning There is @b absolutely no guarantee that the returned
-           *  contents may safely be interpreted as ASCII text.  Beware!
-           */
+        /*!
+         * @brief Obtain standard string for compatibility with other code.
+         * @warning There is @b absolutely no guarantee that the returned
+         *  contents may safely be interpreted as ASCII text.  Beware!
+         */
         operator std::string () const;
     };
 
-      /*!
-       * @brief Output to standard stream.
-       */
+    /*!
+     * @brief Output to standard stream.
+     */
     std::ostream& operator<< ( std::ostream& stream, const Bytes& string );
 
-      /*!
-       * @brief Compare two strings for equality.
-       */
+    /*!
+     * @brief Compare two strings for equality.
+     */
     bool operator== ( const Bytes& lhs, const Bytes& rhs );
     bool operator== ( const Bytes& lhs, const char * rhs );
     bool operator== ( const char * lhs, const Bytes& rhs );

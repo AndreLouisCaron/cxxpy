@@ -15,6 +15,8 @@ namespace py {
 
       /*!
        * @brief Placeholder for "nothing", "nil", "null", etc.
+       *
+       * @see http://docs.python.org/c-api/none.html
        */
     class None :
         public Object

@@ -15,9 +15,9 @@
 
 namespace py {
 
-      /*!
-       * @brief Function, bound method, function object, etc.
-       */
+    /*!
+     * @brief Function, bound method, function object, etc.
+     */
     class Callable :
         public Object
     {

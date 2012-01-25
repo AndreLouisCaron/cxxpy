@@ -119,9 +119,9 @@ namespace py {
         Object operator() ();
     };
 
-      /*!
-       * @brief
-       */
+    /*!
+     * @brief
+     */
     template<Object(*Function)(Object)>
     class noargs
     {
@@ -131,15 +131,15 @@ namespace py {
                 Object(Object::acquire(self))).release());
         }
     public:
-        operator Method::VarArgCall () const
+        operator Method::NoArgsCall () const
         {
             return (&noargs<Function>::backend);
         }
     };
 
-      /*!
-       * @brief
-       */
+    /*!
+     * @brief
+     */
     template<Object(*Function)(Object,Tuple)>
     class vararg
     {
@@ -156,9 +156,9 @@ namespace py {
         }
     };
 
-      /*!
-       * @brief
-       */
+    /*!
+     * @brief
+     */
     template<Object(*Function)(Object,Tuple,Map)>
     class kwdarg
     {
@@ -177,9 +177,9 @@ namespace py {
         }
     };
 
-      /*!
-       * @brief
-       */
+    /*!
+     * @brief
+     */
     template<int(*Function)(Object,Tuple,Map)>
     class ctor
     {
@@ -197,7 +197,6 @@ namespace py {
             return (&ctor<Function>::backend);
         }
     };
-
 
 }
 

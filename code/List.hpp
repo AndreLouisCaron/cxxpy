@@ -14,9 +14,11 @@
 
 namespace py {
 
-      /*!
-       * @brief Variable-length list of items (array, vector).
-       */
+    /*!
+     * @brief Variable-length list of items (array, vector).
+     *
+     * @see http://docs.python.org/c-api/list.html
+     */
     class List :
         public Object
     {
