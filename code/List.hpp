@@ -42,6 +42,8 @@ namespace py {
     public:
         size_type size () const;
 
+        void append ( const Object& item );
+
         /* operators. */
     public:
         Object operator[] ( size_type index ) const;

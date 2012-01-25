@@ -82,6 +82,14 @@ namespace py {
         return (::PyList_Size(handle()));
     }
 
+    void List::append ( const Object& item )
+    {
+        const int result = ::PyList_Append(handle(), item.handle());
+        if (result < 0) {
+            Error::translate();
+        }
+    }
+
     Object List::operator[] ( size_type i ) const
     {
         return (Object(::fetch(handle(), i)));
