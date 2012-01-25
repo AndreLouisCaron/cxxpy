@@ -82,11 +82,19 @@ namespace py {
         Object operator() ( const Tuple& args, const Map& kwds ) const;
     };
 
+    /*!
+     * @see http://docs.python.org/c-api/typeobj.html
+     */
     class TypeBuilder
     {
         /* nested types. */
     public:
         typedef int(*Ctor)(::PyObject*,::PyObject*,::PyObject*);
+
+        /* class methods. */
+    public:
+        static void * get_baton ( Object object );
+        static void set_baton ( Object object, void * baton );
 
         /* data. */
     private:
@@ -102,6 +110,7 @@ namespace py {
         /* methods. */
     public:
         void init ( Ctor ctor );
+        void iterable( Method::NoArgsCall iter, Method::NoArgsCall next );
         void add ( const Method& method );
         void finish ();
 

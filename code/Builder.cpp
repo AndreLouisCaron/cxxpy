@@ -159,6 +159,20 @@ namespace py {
         return (Object(acquire(result)));
     }
 
+    void * TypeBuilder::get_baton ( Object object )
+    {
+        ::BASIC_OBJECT *const self =
+            reinterpret_cast<::BASIC_OBJECT*>(object.handle());
+        return (self->baton);
+    }
+
+    void TypeBuilder::set_baton ( Object object, void * baton )
+    {
+        ::BASIC_OBJECT *const self =
+            reinterpret_cast<::BASIC_OBJECT*>(object.handle());
+        self->baton = baton;
+    }
+
     TypeBuilder::TypeBuilder ( const Bytes& name )
         : myName(name)
     {
@@ -185,6 +199,14 @@ namespace py {
     void TypeBuilder::init ( TypeBuilder::Ctor ctor )
     {
         myData.tp_init = ctor;
+    }
+
+    void TypeBuilder::iterable ( Method::NoArgsCall iter,
+                                 Method::NoArgsCall next )
+    {
+        myData.tp_flags |= Py_TPFLAGS_HAVE_ITER;
+        myData.tp_iter = iter;
+        myData.tp_iternext = next;
     }
 
     void TypeBuilder::add ( const Method& method )
@@ -222,6 +244,9 @@ namespace py {
             {
             }
         }
+
+          // Set baton.
+        set_baton(object, 0);
         
           // Finish.
         return (object);
