@@ -12,6 +12,7 @@ set(headers
   Iterator.hpp
   Library.hpp
   List.hpp
+  Lock.hpp
   Map.hpp
   Module.hpp
   None.hpp
@@ -32,6 +33,7 @@ set(sources
   Iterator.cpp
   Library.cpp
   List.cpp
+  Lock.cpp
   Map.cpp
   Module.cpp
   None.cpp
