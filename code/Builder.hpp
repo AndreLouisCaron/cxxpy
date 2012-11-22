@@ -93,8 +93,8 @@ namespace py {
 
         /* class methods. */
     public:
-        static void * get_baton ( Object object );
-        static void set_baton ( Object object, void * baton );
+        static void * get_baton (const Object& object);
+        static void set_baton (Object& object, void * baton );
 
         /* data. */
     private:
@@ -122,14 +122,14 @@ namespace py {
     /*!
      * @brief
      */
-    template<Object(*Function)(Object)>
+    template<Any(*Function)(Object)>
     class noargs
     {
         static ::PyObject * backend ( ::PyObject * self )
         {
-            return (Function(
-                Object(Object::acquire(self))).release());
+            return (Function(proxy(self)).release());
         }
+
     public:
         operator Method::NoArgsCall () const
         {
@@ -140,15 +140,14 @@ namespace py {
     /*!
      * @brief
      */
-    template<Object(*Function)(Object,Tuple)>
+    template<Any(*Function)(Object,Tuple)>
     class vararg
     {
         static ::PyObject * backend ( ::PyObject * self, ::PyObject * args )
         {
-            return (Function(
-                Object(Object::acquire(self)),
-                Tuple (Object::acquire(args))).release());
+            return (Function(proxy(self), Tuple(proxy(args))).release());
         }
+
     public:
         operator Method::VarArgCall () const
         {
@@ -159,17 +158,16 @@ namespace py {
     /*!
      * @brief
      */
-    template<Object(*Function)(Object,Tuple,Map)>
+    template<Any(*Function)(Object,Tuple,Map)>
     class kwdarg
     {
         static ::PyObject * backend
             ( ::PyObject * self, ::PyObject * args, ::PyObject * kwds )
         {
-            return (Function(
-                Object(Object::acquire(self)),
-                Tuple (Object::acquire(args)),
-                Map   (Object::acquire(kwds))).release());
+            return (Function(proxy(self),
+                             Tuple(proxy(args)), Map(proxy(kwds))).release());
         }
+
     public:
         operator Method::VarArgCall () const
         {
@@ -186,11 +184,10 @@ namespace py {
         static int backend
             ( ::PyObject * self, ::PyObject * args, ::PyObject * kwds )
         {
-            return (Function(
-                Object(Object::acquire(self)),
-                Tuple (Object::acquire(args)),
-                Map   (Object::acquire(kwds))));
+            return (Function(proxy(self),
+                             Tuple(proxy(args)), Map(proxy(kwds))));
         }
+
     public:
         operator TypeBuilder::Ctor () const
         {

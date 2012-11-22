@@ -11,70 +11,82 @@
 
 namespace {
 
-    ::PyObject * allocate ( ::Py_ssize_t size )
+    py::Handle allocate ( ::Py_ssize_t size )
     {
         ::PyObject *const object = ::PyList_New(size);
         if ( object == 0 )
         {
         }
-        return (object);
+        return (py::steal(object));
     }
 
     void place ( ::PyObject * list, ::Py_ssize_t index, ::PyObject * value )
     {
-        PyList_SET_ITEM(list, index, py::Object::acquire(value));
+        Py_INCREF(value);
+        PyList_SET_ITEM(list, index, value);
     }
 
     void store ( ::PyObject * list, ::Py_ssize_t index, ::PyObject * value )
     {
+        Py_INCREF(value);
         const int result =
-            ::PyList_SetItem(list, index, py::Object::acquire(value));
+            ::PyList_SetItem(list, index, value);
         if ( result == -1 )
         {
             py::Error::translate();
         }
     }
 
-    ::PyObject * fetch ( ::PyObject * list, ::Py_ssize_t index )
+    py::Handle fetch ( ::PyObject * list, ::Py_ssize_t index )
     {
         ::PyObject *const value = ::PyList_GetItem(list, index);
         if ( value == 0 )
         {
         }
-        return (py::Object::acquire(value));
+        return (py::share(value));
     }
 
 }
 
 namespace py {
 
-    bool List::isa ( const Object& object, bool exact )
+    bool List::is_a (const Handle& handle, bool exact)
     {
-        return (exact? PyList_CheckExact(object.handle())
-                     : PyList_Check     (object.handle()));
+        return (exact? PyList_CheckExact(handle)
+                     : PyList_Check     (handle));
+    }
+
+    List::List (const Handle& handle)
+        : myHandle(check<List>(handle))
+    {
+    }
+
+    List::List (const Any& any)
+        : myHandle(check<List>(any.handle()))
+    {
     }
 
     List::List ()
-        : Object(::allocate(0))
-    {
-    }
-
-    List::List ( const Object& object )
-        : Object(object.handle())
-    {
-    }
-
-    List::List ( Handle handle )
-        : Object(handle)
+        : myHandle(::allocate(0))
     {
     }
 
     List::List ( size_type size )
-        : Object(::allocate(size))
+        : myHandle(::allocate(size))
     {
         for ( size_type i = 0; (i < size); ++i ) {
             ::place(handle(), i, py::None().handle());
         }
+    }
+
+    const Handle& List::handle () const
+    {
+        return (myHandle);
+    }
+
+    void List::swap (List& other)
+    {
+        myHandle.swap(other.myHandle);
     }
 
     List::size_type List::size () const
@@ -82,7 +94,7 @@ namespace py {
         return (::PyList_Size(handle()));
     }
 
-    void List::append ( const Object& item )
+    void List::append ( const Any& item )
     {
         const int result = ::PyList_Append(handle(), item.handle());
         if (result < 0) {
@@ -90,9 +102,14 @@ namespace py {
         }
     }
 
-    Object List::operator[] ( size_type i ) const
+    List::operator Any () const
     {
-        return (Object(::fetch(handle(), i)));
+        return (Any(myHandle));
+    }
+
+    Any List::operator[] ( size_type i ) const
+    {
+        return (Any(::fetch(handle(), i)));
     }
 
     List::Proxy List::operator[] ( size_type i )
@@ -105,15 +122,15 @@ namespace py {
     {
     }
 
-    List::Proxy& List::Proxy::operator= ( const Object& object )
+    List::Proxy& List::Proxy::operator= ( const Any& object )
     {
         ::store(myList->handle(), myIndex, object.handle());
         return (*this);
     }
 
-    List::Proxy::operator py::Object () const
+    List::Proxy::operator py::Any () const
     {
-        return (Object(::fetch(myList->handle(), myIndex)));
+        return (Any(::fetch(myList->handle(), myIndex)));
     }
 
 }

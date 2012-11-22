@@ -9,12 +9,13 @@
 // "http://www.opensource.org/licenses/mit".
 
 #include <python.h>
-#include "Object.hpp"
+#include "Any.hpp"
 #include <iosfwd>
 #include <string>
 
 namespace py {
 
+    class Any;
     class String;
 
     /*!
@@ -22,8 +23,7 @@ namespace py {
      *
      * @see http://docs.python.org/c-api/string.html
      */
-    class Bytes :
-        public Object
+    class Bytes
     {
         /* nested types. */
     public:
@@ -32,19 +32,27 @@ namespace py {
 
         /* class methods. */
     public:
-        static bool isa ( Handle handle, bool exact=false );
-        static bool isa ( const Object& object, bool exact=false );
+        static bool is_a (const Handle& handle, bool exact=false);
+
+        /* data. */
+    private:
+        Handle myHandle;
 
         /* construction. */
     public:
-        explicit Bytes ( const Object& object );
-        explicit Bytes ( Handle handle, Transfer transfer=share() );
-        Bytes ( const char * data );
-        Bytes ( const void * data, size_type size );
-        Bytes ( const std::string& data );
+        explicit Bytes (const Handle& handle);
+        Bytes (const Any& any);
+
+        Bytes (const char * data);
+        Bytes (const void * data, size_type size);
+        Bytes (const std::string& data);
 
         /* methods. */
     public:
+        const Handle& handle () const;
+
+        void swap (Bytes& other);
+
         /*!
          * @brief Obtain the length of the string, in bytes.
          */
@@ -58,11 +66,13 @@ namespace py {
         /*!
          * @brief Decodes series of bytes to string.
          */
-        const String decode ( const std::string& encoding ) const;
+        const String decode (const std::string& encoding) const;
 
         /* operators. */
     public:
-        Bytes& operator= ( const Bytes& rhs );
+        Bytes& operator= (const Bytes& rhs);
+
+        operator Any () const;
 
         /*!
          * @brief Obtain standard string for compatibility with other code.
@@ -75,14 +85,14 @@ namespace py {
     /*!
      * @brief Output to standard stream.
      */
-    std::ostream& operator<< ( std::ostream& stream, const Bytes& string );
+    std::ostream& operator<< (std::ostream& stream, const Bytes& string);
 
     /*!
      * @brief Compare two strings for equality.
      */
-    bool operator== ( const Bytes& lhs, const Bytes& rhs );
-    bool operator== ( const Bytes& lhs, const char * rhs );
-    bool operator== ( const char * lhs, const Bytes& rhs );
+    bool operator== (const Bytes& lhs, const Bytes& rhs);
+    bool operator== (const Bytes& lhs, const char * rhs);
+    bool operator== (const char * lhs, const Bytes& rhs);
 
 }
 

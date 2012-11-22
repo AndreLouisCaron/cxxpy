@@ -37,4 +37,34 @@ namespace py {
         return (*this);
     }
 
+    bool operator== (const Any& lhs, const Any& rhs)
+    {
+        return (lhs.handle() == rhs.handle());
+    }
+
+    bool operator== (const Any& lhs, const Handle& rhs)
+    {
+        return (lhs.handle() == rhs);
+    }
+
+    bool operator== (const Handle& lhs, const Any& rhs)
+    {
+        return (lhs == rhs.handle());
+    }
+
+    bool operator!= (const Any& lhs, const Any& rhs)
+    {
+        return (lhs.handle() != rhs.handle());
+    }
+
+    bool operator!= (const Any& lhs, const Handle& rhs)
+    {
+        return (lhs.handle() != rhs);
+    }
+
+    bool operator!= (const Handle& lhs, const Any& rhs)
+    {
+        return (lhs != rhs.handle());
+    }
+
 }

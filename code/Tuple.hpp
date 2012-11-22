@@ -10,7 +10,6 @@
 
 #include <python.h>
 #include "Any.hpp"
-#include "Object.hpp"
 
 namespace py {
 
@@ -19,8 +18,7 @@ namespace py {
      *
      * @see http://docs.python.org/c-api/tuple.html
      */
-    class Tuple :
-        public Object
+    class Tuple
     {
         /* nested types. */
     public:
@@ -31,20 +29,29 @@ namespace py {
 
         /* class methods. */
     public:
-        static bool isa ( const Object& object, bool exact=false );
+        static bool is_a (const Handle& object, bool exact=false);
+
+        /* data. */
+    private:
+        Handle myHandle;
 
         /* construction. */
     public:
-        explicit Tuple ( const Object& object );
-        explicit Tuple ( Handle handle );
-        Tuple ( size_type size );
+        explicit Tuple (const Handle& handle);
+        Tuple (const Any& any);
+
+        Tuple (size_type size);
 
         /* methods. */
     public:
+        const Handle& handle () const;
+        void swap (Tuple& other);
+
         size_type size () const;
 
         /* operators. */
     public:
+        operator Any () const;
         Any operator[] ( size_type index ) const;
         Proxy operator[] ( size_type index );
     };
@@ -62,7 +69,7 @@ namespace py {
 
         /* operators. */
     public:
-        Proxy& operator= ( const Object& object );
+        Proxy& operator= ( const Any& object );
         operator Any () const;
     };
 

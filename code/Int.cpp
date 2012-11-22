@@ -9,54 +9,63 @@
 
 namespace {
 
-    ::PyObject * allocate ( long value )
+    py::Handle allocate (long value)
     {
         ::PyObject *const object = ::PyInt_FromLong(value);
-        if ( object == 0 )
+        if (object == 0)
         {
         }
-        return (object);
+        return (py::steal(object));
     }
 
 }
 
 namespace py {
 
-    bool Int::isa ( Handle handle, bool exact )
+    bool Int::is_a (const Handle& handle, bool exact)
     {
-        return (exact? PyInt_CheckExact(handle)
-                     : PyInt_Check     (handle));
+        return (exact? PyInt_CheckExact(handle.data())
+                     : PyInt_Check     (handle.data()));
     }
 
-    bool Int::isa ( const Object& object, bool exact )
-    {
-        return (exact? PyInt_CheckExact(object.handle())
-                     : PyInt_Check     (object.handle()));
-    }
-
-    Int::Int ( int value )
-        : Object(::allocate(static_cast<long>(value)))
+    Int::Int (const Handle& handle)
+        : myHandle(check<Int>(handle))
     {
     }
 
-    Int::Int ( long value )
-        : Object(::allocate(value))
+    Int::Int (const Any& any)
+        : myHandle(check<Int>(any.handle()))
     {
     }
 
-    Int::Int ( Handle handle )
-        : Object(check<Int>(handle), Object::share())
+    Int::Int (int value)
+        : myHandle(::allocate(static_cast<long>(value)))
     {
     }
 
-    Int::Int ( const Object& object )
-        : Object(check<Int>(object.handle()))
+    Int::Int (long value)
+        : myHandle(::allocate(value))
     {
+    }
+
+    const Handle& Int::handle () const
+    {
+        return (myHandle);
+    }
+
+    void Int::swap (Int& other)
+    {
+        myHandle.swap(other.myHandle);
+    }
+
+    Int::operator Any () const
+    {
+        return (Any(myHandle));
     }
 
     Int::operator long () const
     {
-        return PyInt_AS_LONG(handle());
+        return PyInt_AS_LONG(handle().data());
     }
 
 }

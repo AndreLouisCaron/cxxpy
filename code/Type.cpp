@@ -14,8 +14,8 @@ namespace py {
         return (PyType_Check(object.handle()) != 0);
     }
 
-    Type::Type ( Handle handle, Transfer transfer )
-        : Object(handle, transfer)
+    Type::Type (const Handle& handle)
+        : Object(handle)
     {
     }
 
@@ -27,7 +27,8 @@ namespace py {
     bool Type::subtypeof ( const Type& other ) const
     {
         return (::PyType_IsSubtype(
-            (::PyTypeObject*)handle(), (::PyTypeObject*)other.handle()) != 0);
+                    (::PyTypeObject*)handle().data(),
+                    (::PyTypeObject*)other.handle().data()) != 0);
     }
 
 }

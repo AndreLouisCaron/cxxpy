@@ -10,57 +10,78 @@
 
 namespace {
 
-    ::PyObject * allocate ()
+    py::Handle allocate ()
     {
         ::PyObject *const result = ::PyDict_New();
         if ( result == 0 ) {
             py::Error::translate();
         }
-        return (result);
+        return (py::steal(result));
     }
 
 }
 
 namespace py {
 
-    bool Map::isa ( const Object& object, bool exact )
+    bool Map::is_a (const Handle& handle, bool exact)
     {
-        return (exact? PyDict_CheckExact(object.handle())
-                     : PyDict_Check     (object.handle()));
+        return (exact? PyDict_CheckExact(handle)
+                     : PyDict_Check     (handle));
+    }
+
+    Map::Map (const Handle& handle)
+        : myHandle(check<Map>(handle))
+    {
+    }
+
+    Map::Map (const Any& any)
+        : myHandle(check<Map>(any.handle()))
+    {
     }
 
     Map::Map ()
-        : Object(::allocate(), Object::steal())
+        : myHandle(::allocate())
     {
     }
 
-    Map::Map ( Handle handle, Transfer transfer )
-        : Object(handle, transfer)
+    Map::Map (const Map& rhs)
+        : myHandle(rhs.handle())
     {
     }
 
-    Object Map::get ( const std::string& key ) const
+    const Handle& Map::handle () const
+    {
+        return (myHandle);
+    }
+
+    void Map::swap (Map& other)
+    {
+        myHandle.swap(other.myHandle);
+    }
+
+    Any Map::get ( const std::string& key ) const
     {
         ::PyObject *const result =
             ::PyDict_GetItemString(handle(), key.c_str());
         if ( result == 0 ) {
             py::Error::translate();
         }
-        return (Object(result, Object::steal()));
+        return (Any(share(result)));
     }
 
-    Object Map::get ( const Object& key ) const
+    Any Map::get ( const Any& key ) const
     {
         ::PyObject *const result = ::PyDict_GetItem(handle(), key.handle());
         if ( result == 0 ) {
             py::Error::translate();
         }
-        return (Object(result, Object::steal()));
+        return (Any(share(result)));
     }
 
-    Object Map::get ( const std::string& key, const Object& fallback ) const
+    Any Map::get ( const std::string& key, const Any& fallback ) const
     {
-        ::PyObject *const result = ::PyDict_GetItemString(handle(), key.c_str());
+        ::PyObject *const result =
+            ::PyDict_GetItemString(handle(), key.c_str());
         if ( result == 0 )
         {
             if (::PyErr_ExceptionMatches(::PyExc_KeyError)) {
@@ -68,10 +89,10 @@ namespace py {
             }
             py::Error::translate();
         }
-        return (Object(result, Object::steal()));
+        return (Any(share(result)));
     }
 
-    Object Map::get ( const Object& key, const Object& fallback ) const
+    Any Map::get ( const Any& key, const Any& fallback ) const
     {
         ::PyObject *const result = ::PyDict_GetItem(handle(), key.handle());
         if ( result == 0 )
@@ -81,10 +102,10 @@ namespace py {
             }
             py::Error::translate();
         }
-        return (Object(result, Object::steal()));
+        return (Any(share(result)));
     }
 
-    void Map::put ( const Object& key, const Object& value )
+    void Map::put ( const Any& key, const Any& value )
     {
         const int result = ::PyDict_SetItem
             (handle(), key.handle(), value.handle());
@@ -93,7 +114,7 @@ namespace py {
         }
     }
 
-    void Map::put ( const std::string& key, const Object& value )
+    void Map::put ( const std::string& key, const Any& value )
     {
         const int result = ::PyDict_SetItemString
             (handle(), key.c_str(), value.handle());
@@ -104,10 +125,10 @@ namespace py {
 
     void Map::put ( const std::string& key, const std::string& value )
     {
-        put(key, py::Bytes(value));
+        put(key, Any(Bytes(value)));
     }
 
-    void Map::del ( const Object& key )
+    void Map::del ( const Any& key )
     {
         const int result = ::PyDict_DelItem(handle(), key.handle());
         if ( result == -1 ) {
@@ -134,7 +155,12 @@ namespace py {
         if ( result == 0 ) {
             py::Error::translate();
         }
-        return (Map(result, Object::steal()));
+        return (Map(steal(result)));
+    }
+
+    Map::operator Any () const
+    {
+        return (Any(myHandle));
     }
 
 }

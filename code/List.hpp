@@ -9,7 +9,7 @@
 // "http://www.opensource.org/licenses/mit".
 
 #include <python.h>
-#include "Object.hpp"
+#include "Any.hpp"
 #include "Tuple.hpp"
 
 namespace py {
@@ -19,8 +19,7 @@ namespace py {
      *
      * @see http://docs.python.org/c-api/list.html
      */
-    class List :
-        public Object
+    class List
     {
         /* nested types. */
     public:
@@ -31,24 +30,35 @@ namespace py {
 
         /* class methods. */
     public:
-        static bool isa ( const Object& object, bool exact=false );
+        static bool is_a (const Handle& handle, bool exact=false);
+
+        /* data. */
+    private:
+        Handle myHandle;
 
         /* construction. */
     public:
+        explicit List (const Handle& handle);
+        List (const Any& any);
+
         List ();
-        explicit List ( const Object& object );
-        explicit List ( Handle handle );
         explicit List ( size_type size );
 
         /* methods. */
     public:
+        const Handle& handle () const;
+
+        void swap (List& other);
+
         size_type size () const;
 
-        void append ( const Object& item );
+        void append ( const Any& item );
 
         /* operators. */
     public:
-        Object operator[] ( size_type index ) const;
+        operator Any () const;
+
+        Any operator[] ( size_type index ) const;
         Proxy operator[] ( size_type index );
     };
 
@@ -65,8 +75,8 @@ namespace py {
 
         /* operators. */
     public:
-        Proxy& operator= ( const Object& object );
-        operator py::Object () const;
+        Proxy& operator= ( const Any& object );
+        operator py::Any () const;
     };
 
 }

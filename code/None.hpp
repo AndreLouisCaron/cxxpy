@@ -9,7 +9,7 @@
 // "http://www.opensource.org/licenses/mit".
 
 #include <python.h>
-#include "Object.hpp"
+#include "Any.hpp"
 
 namespace py {
 
@@ -18,15 +18,24 @@ namespace py {
        *
        * @see http://docs.python.org/c-api/none.html
        */
-    class None :
-        public Object
+    class None
     {
+        /* data. */
+    private:
+        Handle myHandle;
+
         /* construction. */
     public:
         None ();
-    };
 
-    static None none;
+        /* methods. */
+    public:
+        const Handle& handle () const;
+
+        /* operators. */
+    public:
+        operator Any () const;
+    };
 
 }
 

@@ -9,7 +9,7 @@
 // "http://www.opensource.org/licenses/mit".
 
 #include <python.h>
-#include "Object.hpp"
+#include "Any.hpp"
 
 namespace py {
 
@@ -18,20 +18,31 @@ namespace py {
        *
        * @see http://docs.python.org/c-api/bool.html
        */
-    class Bool :
-        public Object
+    class Bool
     {
         /* class methods. */
     public:
-        static bool isa ( Handle handle );
-        static bool isa ( const Object& object );
+        static bool is_a (const Handle& handle);
+
+        /* data. */
+    private:
+        Handle myHandle;
 
         /* construction. */
     public:
-        Bool ( bool value=false );
+        explicit Bool (const Handle& handle);
+        Bool (const Any& any);
 
-        explicit Bool ( Handle handle );
-        explicit Bool ( const Object& object );
+        Bool (bool value=false);
+
+        /* methods. */
+    public:
+        const Handle& handle () const;
+        void swap(Bool& other);
+
+        /* operators. */
+    public:
+        operator Any () const;
     };
 
     Bool True ();

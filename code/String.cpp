@@ -10,48 +10,58 @@
 
 namespace {
 
-    ::PyObject * allocate ( const wchar_t * data, ::Py_ssize_t size )
+    py::Handle allocate ( const wchar_t * data, ::Py_ssize_t size )
     {
         ::PyObject *const object = ::PyUnicode_FromWideChar(data, size);
-        if ( object == 0 )
+        if (object == 0)
         {
         }
-        return (object);
+        return (py::steal(object));
     }
 
 }
 
 namespace py {
 
-    bool String::isa ( const Object& object, bool exact )
+    bool String::is_a ( const Handle& handle, bool exact )
     {
-        return (exact? PyUnicode_CheckExact(object.handle())
-                     : PyUnicode_Check     (object.handle()));
+        return (exact? PyUnicode_CheckExact(handle)
+                     : PyUnicode_Check     (handle));
     }
 
-    String::String ( const Object& object )
-        : Object(object)
+    String::String (const Any& any)
+        : myHandle(check<String>(any.handle()))
     {
     }
 
-    String::String ( Handle handle, Transfer transfer )
-        : Object(handle, transfer)
+    String::String (const Handle& handle)
+        : myHandle(check<String>(handle))
     {
     }
 
     String::String ( const wchar_t * data )
-        : Object(::allocate(data, ::wcslen(data)), Object::steal())
+        : myHandle(::allocate(data, ::wcslen(data)))
     {
     }
 
     String::String ( const wchar_t * data, size_type size )
-        : Object(::allocate(data, size), Object::steal())
+        : myHandle(::allocate(data, size))
     {
     }
 
     String::String ( const std::wstring& data )
-        : Object(::allocate(data.c_str(), data.size()), Object::steal())
+        : myHandle(::allocate(data.c_str(), data.size()))
     {
+    }
+
+    const Handle& String::handle () const
+    {
+        return (myHandle);
+    }
+
+    void String::swap (String& other)
+    {
+        myHandle.swap(other.myHandle);
     }
 
     String::size_type String::size () const
@@ -71,7 +81,12 @@ namespace py {
         if ( object == 0 )
         {
         }
-        return (Bytes(object, steal()));
+        return (Bytes(steal(object)));
+    }
+
+    String::operator Any () const
+    {
+        return (myHandle);
     }
 
     String::operator std::wstring () const

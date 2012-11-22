@@ -71,7 +71,7 @@ namespace wsgi {
             py::Tuple arguments(2);
             arguments[0] = application;
             arguments[1] = environment;
-            return (py::Tuple(myWrapper(arguments)));
+            return (py::Tuple(myWrapper(arguments).handle()));
         }
     };
 
@@ -208,7 +208,7 @@ namespace exports {
         return (0);
     }
 
-    py::Object read ( py::Object self, py::Tuple args )
+    py::Any read ( py::Object self, py::Tuple args )
     try
     {
         std::istream& stream = *static_cast<std::istream*>
@@ -234,7 +234,7 @@ namespace exports {
         return (py::None());
     }
 
-    py::Object readline ( py::Object self )
+    py::Any readline ( py::Object self )
     {
         std::istream& stream = *static_cast<std::istream*>
             (py::TypeBuilder::get_baton(self));
@@ -245,7 +245,7 @@ namespace exports {
         return (py::Bytes(line));
     }
 
-    py::Object readlines ( py::Object self, py::Tuple args )
+    py::Any readlines ( py::Object self, py::Tuple args )
     {
         std::istream& stream = *static_cast<std::istream*>
             (py::TypeBuilder::get_baton(self));
@@ -256,21 +256,21 @@ namespace exports {
         return (lines);
     }
 
-    py::Object iter ( py::Object self )
+    py::Any iter ( py::Object self )
     {
         return (self);
     }
 
-    py::Object next ( py::Object self )
+    py::Any next ( py::Object self )
     {
         const py::Object line = readline(self);
-        if (line.handle() == py::none.handle()) {
-            return (py::Object());
+        if (line.handle() == py::None()) {
+            return (py::Any());
         }
         return (line);
     }
 
-    py::Object flush ( py::Object self )
+    py::Any flush ( py::Object self )
     {
         std::ostream& stream = *static_cast<std::ostream*>
             (py::TypeBuilder::get_baton(self));
@@ -278,7 +278,7 @@ namespace exports {
         return (py::None());
     }
 
-    py::Object write ( py::Object self, py::Tuple args )
+    py::Any write ( py::Object self, py::Tuple args )
     {
         std::ostream& stream = *static_cast<std::ostream*>
             (py::TypeBuilder::get_baton(self));
@@ -289,7 +289,7 @@ namespace exports {
         return (py::None());
     }
 
-    py::Object writelines ( py::Object self, py::Tuple args )
+    py::Any writelines ( py::Object self, py::Tuple args )
     {
         std::ostream& stream = *static_cast<std::ostream*>
             (py::TypeBuilder::get_baton(self));
@@ -308,7 +308,7 @@ namespace exports {
 int main ( int, char ** )
 try
 {
-    // Prepare the interpreter.a
+    // Prepare the interpreter.
     const py::Library library;
 
     // Build input stream class for 'wsgi.input' object.

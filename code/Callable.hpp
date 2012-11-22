@@ -23,18 +23,18 @@ namespace py {
     {
         /* class methods. */
     public:
-        static bool isa ( const Object& object );
+        static bool isa (const Object& object);
 
         /* construction. */
     public:
-        explicit Callable ( const Object& object );
-        explicit Callable ( Handle handle );
+        explicit Callable (const Object& object);
+        explicit Callable (const Handle& handle);
 
         /* operators. */
     public:
-        Object operator() ( const Tuple& pargs ) const;
-        Object operator() ( const Tuple& pargs, const Map& nargs ) const;
-        Object operator() ( const Map& nargs ) const;
+        Object operator() (const Tuple& pargs) const;
+        Object operator() (const Tuple& pargs, const Map& nargs) const;
+        Object operator() (const Map& nargs) const;
     };
 
 }

@@ -18,27 +18,22 @@
 
 namespace {
 
-    ::PyObject * getiterator ( ::PyObject * iterable )
+    py::Handle getiterator ( ::PyObject * iterable )
     {
         ::PyObject *const result = ::PyObject_GetIter(iterable);
         if ( result == 0 ) {
             py::Error::translate();
         }
-        return (result);
+        return (py::share(result));
     }
 
 }
 
 namespace py {
 
-    bool Iterator::isa ( const Handle& handle )
+    bool Iterator::is_a ( const Handle& handle )
     {
-        return (PyIter_Check(handle) != 0);
-    }
-
-    bool Iterator::isa ( const Object& object )
-    {
-        return (PyIter_Check(object.handle()) != 0);
+        return (PyIter_Check(handle.data()) != 0);
     }
 
     Iterator::Iterator ()
@@ -56,23 +51,23 @@ namespace py {
     }
 
     Iterator::Iterator ( const List& list )
-        : Object(acquire(::getiterator(list.handle())))
+        : Object(::getiterator(list.handle()))
     {
     }
 
     Iterator::Iterator ( const Tuple& iterable )
-        : Object(acquire(::getiterator(iterable.handle())))
+        : Object(::getiterator(iterable.handle()))
     {
     }
 
     bool Iterator::next ()
     {
         ::PyObject *const result = ::PyIter_Next(handle());
-        if ( result == 0 )
-        {
+        if ( result == 0 ) {
             // Means "end of sequence".  Could it also be an error?
+            return false;
         }
-        return (myItem = Any(acquire(result)));
+        return (myItem = Any(share(result)));
     }
 
     Any Iterator::item () const

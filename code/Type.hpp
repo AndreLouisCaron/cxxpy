@@ -25,7 +25,7 @@ namespace py {
 
         /* construction. */
     public:
-        Type ( Handle handle, Transfer transfer=share() );
+        Type (const Handle& handle);
         explicit Type ( const Object& object );
 
         /* methods. */

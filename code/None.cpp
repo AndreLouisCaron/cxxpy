@@ -10,8 +10,18 @@
 namespace py {
 
     None::None ()
-        : Object(Py_None)
+        : myHandle(share(Py_None))
     {
+    }
+
+    const Handle& None::handle () const
+    {
+        return (myHandle);
+    }
+
+    None::operator Any () const
+    {
+        return (Any(myHandle));
     }
 
 }

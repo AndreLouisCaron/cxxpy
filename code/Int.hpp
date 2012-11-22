@@ -9,7 +9,7 @@
 // "http://www.opensource.org/licenses/mit".
 
 #include <python.h>
-#include "Object.hpp"
+#include "Any.hpp"
 
 namespace py {
 
@@ -18,24 +18,32 @@ namespace py {
        *
        * @see http://docs.python.org/c-api/int.html
        */
-    class Int :
-        public Object
+    class Int
     {
         /* class methods. */
     public:
-        static bool isa ( Handle handle, bool exact=false );
-        static bool isa ( const Object& object, bool exact=false );
+        static bool is_a (const Handle& handle, bool exact=false);
+
+        /* data. */
+    private:
+        Handle myHandle;
 
         /* construction. */
     public:
-        Int ( int value=0 );
-        Int ( long value );
+        explicit Int (const Handle& handle);
+        Int (const Any& any);
 
-        explicit Int ( Handle handle );
-        explicit Int ( const Object& object );
+        Int (int value=0);
+        Int (long value);
+
+        /* methods. */
+    public:
+        const Handle& handle () const;
+        void swap (Int& other);
 
         /* operators. */
     public:
+        operator Any () const;
         operator long () const;
     };
 

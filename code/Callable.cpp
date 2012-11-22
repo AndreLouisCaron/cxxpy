@@ -10,45 +10,45 @@
 
 namespace {
 
-    ::PyObject * invoke
+    py::Handle invoke
         ( ::PyObject * callable, ::PyObject * pargs, ::PyObject * nargs )
     {
-           // Attempt to invoke callable.
+        // Increase reference for call.
+        Py_XINCREF(callable);
+        Py_XINCREF(pargs);
+        Py_XINCREF(nargs);
+        // Attempt to invoke callable.
         ::PyObject *const result =
-            ::PyEval_CallObjectWithKeywords(
-            py::Object::acquire(callable),
-            py::Object::acquire(pargs),
-            py::Object::acquire(nargs)
-            );
-          // If an error occured,
+              ::PyEval_CallObjectWithKeywords(callable, pargs, nargs);
+        // If an error occured,
         if ( result == 0 )
         {
-              // release abandoned references;
-            py::Object::release(callable);
-            py::Object::release(pargs);
-            py::Object::release(nargs);
-              // raise equivalent C++ exception.
+            // release abandoned references;
+            Py_XDECREF(callable);
+            Py_XDECREF(pargs);
+            Py_XDECREF(nargs);
+            // raise equivalent C++ exception.
             py::Error::translate();
         }
-          // Caller owns result.
-        return (result);
+        // Caller owns result.
+        return (py::steal(result));
     }
 
 }
 
 namespace py {
 
-    bool Callable::isa ( const Object& object )
+    bool Callable::isa (const Object& object)
     {
         return (::PyCallable_Check(object.handle()) != 0);
     }
 
-    Callable::Callable ( const Object& object )
+    Callable::Callable (const Object& object)
         : Object(object.handle())
     {
     }
 
-    Callable::Callable ( Handle handle )
+    Callable::Callable (const Handle& handle)
         : Object(handle)
     {
     }

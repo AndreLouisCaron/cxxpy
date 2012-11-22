@@ -12,18 +12,17 @@
 
 namespace {
 
-    ::PyObject * content ()
+    py::Handle content ()
     {
-          // Get exception information.
+        // Get exception information.
         ::PyObject * type = 0;
         ::PyObject * value = 0;
         ::PyObject * traceback = 0;
         ::PyErr_Fetch(&type, &value, &traceback);
-          // Release unused references.
-        type = py::Object::release(type);
-        traceback = py::Object::release(traceback);
-          // Return requested value.
-        return (value);
+        // Caller owns results.
+        Py_DECREF(type);
+        Py_DECREF(traceback);
+        return (py::steal(value));
     }
 
 

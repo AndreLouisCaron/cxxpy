@@ -50,10 +50,10 @@ namespace py {
             Error::translate();
         }
           // Return the module reference.
-        return (Module(Object::acquire(result)));
+        return (Module(share(result)));
     }
 
-    Module::Module ( Handle handle )
+    Module::Module (const Handle& handle)
         : Object(handle)
     {
     }
@@ -69,7 +69,7 @@ namespace py {
         if ( result == 0 ) {
             // Documentation says it can never fail...
         }
-        return (Map(result, share()));
+        return (Map(share(result)));
     }
 
     Object Module::symbol ( const std::string& name ) const
@@ -79,7 +79,7 @@ namespace py {
 
     Module Module::reload ()
     {
-        return (Module(::PyImport_ReloadModule(handle())));
+        return (Module(share(::PyImport_ReloadModule(handle()))));
     }
 
     Module::Lock::Lock ()
@@ -98,7 +98,7 @@ namespace py {
         if ( result == 0 ) {
             Error::translate();
         }
-        return (Map(result));
+        return (Map(share(result)));
     }
 
     Module module ( const std::string& name )
@@ -112,22 +112,22 @@ namespace py {
         if ( result == 0 ) {
             Error::translate();
         }
-        return (Module(result));
+        return (Module(steal(result)));
     }
 
     const Map builtins ()
     {
-        return (Map(::PyEval_GetBuiltins()));
+        return (Map(share(::PyEval_GetBuiltins())));
     }
 
     const Map globals ()
     {
-        return (Map(::PyEval_GetGlobals()));
+        return (Map(share(::PyEval_GetGlobals())));
     }
 
     const Map locals ()
     {
-        return (Map(::PyEval_GetLocals()));
+        return (Map(share(::PyEval_GetLocals())));
     }
 
 }

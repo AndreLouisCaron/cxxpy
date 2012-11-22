@@ -11,9 +11,9 @@
 #include <python.h>
 #include <typeinfo>
 
-namespace py {
+#include "Handle.hpp"
 
-    typedef Py_ssize_t ssize_t;
+namespace py {
 
     class Map;
     class Type;
@@ -23,19 +23,6 @@ namespace py {
        */
     class Object
     {
-        /* nested types. */
-    public:
-        typedef ::PyObject* Handle;
-
-        /* class methods. */
-    public:
-        static Handle acquire ( Handle object );
-        static Handle release ( Handle object );
-
-        typedef Handle(*Transfer)(Handle);
-        static Transfer steal ();
-        static Transfer share ();
-
         /* data. */
     protected:
         Handle myHandle;
@@ -43,13 +30,13 @@ namespace py {
         /* construction. */
     public:
         Object ();
-        explicit Object ( Handle handle, Transfer transfer=share() );
-        Object ( const Object& other );
+        Object (const Handle& handle);
+        Object (const Object& other);
         ~Object ();
 
         /* methods. */
     public:
-        Handle handle () const;
+        const Handle& handle () const;
 
         const Type type () const;
         const size_t size () const;
@@ -59,13 +46,13 @@ namespace py {
         Handle release ();
 
     protected:
-        void swap ( Object& rhs );
+        void swap (Object& rhs);
 
         /* operators. */
     private:
-            // Prohibited.  Leads to errors in class hierarchy (allows
-            // copy from an unrelated object also derived from Object).
-        Object& operator= ( const Object& );
+        // Prohibited.  Leads to errors in class hierarchy (allows
+        // copy from an unrelated object also derived from Object).
+        Object& operator= (const Object&);
 
     public:
         operator bool () const;
@@ -73,15 +60,18 @@ namespace py {
     };
 
     template<typename T>
-    bool isa ( const Object::Handle& handle )
+    bool is_a (const Handle& handle)
     {
-        return (T::isa(handle));
+        return (!handle || T::is_a(handle));
     }
 
     template<typename T>
-    Object::Handle check ( const Object::Handle& handle )
+    Handle check (const Handle& handle)
     {
-        if ( !isa<T>(handle) ) {
+        if (!handle) {
+            return (handle);
+        }
+        if (!is_a<T>(handle)) {
             throw (std::bad_cast());
         }
         return (handle);

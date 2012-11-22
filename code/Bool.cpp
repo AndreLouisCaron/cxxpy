@@ -9,52 +9,62 @@
 
 namespace {
 
-    ::PyObject * allocate ( bool value )
+    py::Handle allocate ( bool value )
     {
         ::PyObject *const object = ::PyBool_FromLong(value?1:0);
         if ( object == 0 )
         {
         }
-        return (object);
+        return (py::steal(object));
     }
 
 }
 
 namespace py {
 
-    bool Bool::isa ( Handle handle )
+    bool Bool::is_a (const Handle& handle)
     {
-        return (PyBool_Check(handle));
+        return (PyBool_Check(handle.data()));
     }
 
-    bool Bool::isa ( const Object& object )
-    {
-        return (isa(object.handle()));
-    }
-
-    Bool::Bool ( bool value )
-        : Object(::allocate(value), Object::steal())
+    Bool::Bool (const Handle& handle)
+        : myHandle(check<Bool>(handle))
     {
     }
 
-    Bool::Bool ( Handle handle )
-        : Object(check<Bool>(handle), Object::share())
+    Bool::Bool (const Any& any)
+        : myHandle(check<Bool>(any.handle()))
     {
     }
 
-    Bool::Bool ( const Object& object )
-        : Object(check<Bool>(object.handle()), Object::share())
+    Bool::Bool (bool value)
+        : myHandle(::allocate(value))
     {
+    }
+
+    const Handle& Bool::handle () const
+    {
+        return (myHandle);
+    }
+
+    void Bool::swap(Bool& other)
+    {
+        myHandle.swap(other.myHandle);
+    }
+
+    Bool::operator Any () const
+    {
+        return (Any(myHandle));
     }
 
     Bool True ()
     {
-        return (Bool(Py_True));
+        return (Bool(share(Py_True)));
     }
 
     Bool False ()
     {
-        return (Bool(Py_False));
+        return (Bool(share(Py_False)));
     }
 
 }

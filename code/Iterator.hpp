@@ -45,8 +45,7 @@ namespace py {
 
         /* class methods. */
     public:
-        static bool isa ( const Handle& handle );
-        static bool isa ( const Object& object );
+        static bool is_a ( const Handle& handle );
 
         /* data. */
     private:

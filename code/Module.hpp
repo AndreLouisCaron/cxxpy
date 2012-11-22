@@ -31,13 +31,13 @@ namespace py {
 
         /* construction. */
     public:
-        explicit Module ( Handle handle );
-        explicit Module ( const Object& object );
+        explicit Module (const Handle& handle);
+        explicit Module (const Object& object);
 
         /* methods. */
     public:
         const Map symbols () const;
-        Object symbol ( const std::string& name ) const;
+        Object symbol (const std::string& name) const;
 
         Module reload ();
     };

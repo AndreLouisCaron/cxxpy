@@ -10,35 +10,44 @@
 
 #include <python.h>
 #include <string>
-#include "Object.hpp"
+#include "Any.hpp"
 
 namespace py {
 
       /*!
        * @brief Key-value mapping (dictionary).
        */
-    class Map :
-        public Object
+    class Map
     {
         /* class methods. */
     public:
-        static bool isa ( const Object& object, bool exact=false );
+        static bool is_a (const Handle& handle, bool exact=false);
+
+        /* data. */
+    private:
+        Handle myHandle;
 
         /* construction. */
     public:
+        explicit Map (const Handle& handle);
+        Map (const Any& any);
+
         Map ();
-        Map ( Handle handle, Transfer transfer=share() );
+        Map (const Map& rhs);
 
         /* methods. */
     public:
-        Object get ( const std::string& key ) const;
-        Object get ( const Object& key ) const;
-        Object get ( const std::string& key, const Object& fallback ) const;
-        Object get ( const Object& key, const Object& fallback ) const;
-        void put ( const Object& key, const Object& value );
-        void put ( const std::string& key, const Object& value );
+        const Handle& handle () const;
+        void swap (Map& other);
+
+        Any get ( const std::string& key ) const;
+        Any get ( const Any& key ) const;
+        Any get ( const std::string& key, const Any& fallback ) const;
+        Any get ( const Any& key, const Any& fallback ) const;
         void put ( const std::string& key, const std::string& value );
-        void del ( const Object& key );
+        void put ( const std::string& key, const Any& value );
+        void put ( const Any& key, const Any& value );
+        void del ( const Any& key );
         void del ( const std::string& key );
 
         void clear ();
@@ -47,6 +56,7 @@ namespace py {
 
         /* operators. */
     public:
+        operator Any () const;
     };
 
 }

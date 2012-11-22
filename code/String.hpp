@@ -9,7 +9,7 @@
 // "http://www.opensource.org/licenses/mit".
 
 #include <python.h>
-#include "Object.hpp"
+#include "Any.hpp"
 #include <string>
 
 namespace py {
@@ -21,8 +21,7 @@ namespace py {
      *
      * @see http://docs.python.org/c-api/unicode.html
      */
-    class String :
-        public Object
+    class String
     {
         /* nested types. */
     public:
@@ -32,25 +31,34 @@ namespace py {
         /* class methods. */
     public:
         /*!
-         * @brief Checks if @a object is a string (or derived type).
+         * @brief Checks if @a handle is a string (or derived type).
          * @param exact Set to true to reject derived types.
          */
-        static bool isa ( const Object& object, bool exact=false );
+        static bool is_a ( const Handle& handle, bool exact=false );
+
+        /* data. */
+    private:
+        Handle myHandle;
 
         /* construction. */
     public:
+        String (const Handle& handle);
+
         /*!
          * @brief Cast a generic object to a string.
-         * @pre @code String::isa(object) == true @endcode
+         * @pre @c any.is_a<String> returns @c true.
          */
-        explicit String ( const Object& object );
-        String ( Handle handle, Transfer transfer=share() );
+        String (const Any& any);
+
         explicit String ( const wchar_t * data );
         explicit String ( const wchar_t * data, size_type size );
         explicit String ( const std::wstring& data );
 
         /* methods. */
     public:
+        const Handle& handle () const;
+        void swap (String& other);
+
         /*!
          * @brief Obtain the length of the string, in code points.
          * @warning This does not necessarily equal the number of "characters"
@@ -71,6 +79,8 @@ namespace py {
 
         /* operators. */
     public:
+        operator Any () const;
+
         /*!
          * @brief Obtain standard string for compatibility with other code.
          */

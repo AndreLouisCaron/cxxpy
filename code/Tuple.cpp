@@ -8,74 +8,89 @@
 #include "Tuple.hpp"
 #include "None.hpp"
 #include "Error.hpp"
-#include <iostream>
 
 namespace {
 
-    ::PyObject * allocate ( ::Py_ssize_t size )
+    py::Handle allocate ( ::Py_ssize_t size )
     {
         ::PyObject *const object = ::PyTuple_New(size);
         if ( object == 0 )
         {
         }
-        return (object);
+        return (py::steal(object));
     }
 
     void place ( ::PyObject * tuple, ::Py_ssize_t index, ::PyObject * value )
     {
-        PyTuple_SET_ITEM(tuple, index, py::Object::acquire(value));
+        Py_INCREF(value);
+        PyTuple_SET_ITEM(tuple, index, value);
     }
 
     void store ( ::PyObject * tuple, ::Py_ssize_t index, ::PyObject * value )
     {
-        const int result =
-            ::PyTuple_SetItem(tuple, index, py::Object::acquire(value));
+        Py_INCREF(value);
+        const int result = ::PyTuple_SetItem(tuple, index, value);
         if ( result == -1 )
         {
             py::Error::translate();
         }
     }
 
-    ::PyObject * fetch ( ::PyObject * tuple, ::Py_ssize_t index )
+    py::Handle fetch ( ::PyObject * tuple, ::Py_ssize_t index )
     {
         ::PyObject *const value = ::PyTuple_GetItem(tuple, index);
         if ( value == 0 )
         {
         }
-        return (py::Object::acquire(value));
+        return (py::steal(value));
     }
 
 }
 
 namespace py {
 
-    bool Tuple::isa ( const Object& object, bool exact )
+    bool Tuple::is_a (const Handle& handle, bool exact)
     {
-        return (exact? PyTuple_CheckExact(object.handle())
-                     : PyTuple_Check     (object.handle()));
+        return (exact? PyTuple_CheckExact(handle)
+                     : PyTuple_Check     (handle));
     }
 
-    Tuple::Tuple ( const Object& object )
-        : Object(object.handle())
+    Tuple::Tuple (const Handle& handle)
+        : myHandle(check<Tuple>(handle))
     {
     }
 
-    Tuple::Tuple ( Handle handle )
-        : Object(handle)
+    Tuple::Tuple (const Any& any)
+        : myHandle(check<Tuple>(any.handle()))
     {
     }
 
     Tuple::Tuple ( size_type size )
-        : Object(::allocate(size), Object::steal())
+        : myHandle(::allocate(size))
     {
         for ( size_type i = 0; (i < size); ++i ) {
-            ::place(handle(), i, py::None().handle());
+            ::place(handle(), i, Py_None);
         }
+    }
+
+    const Handle& Tuple::handle () const
+    {
+        return (myHandle);
+    }
+
+    void Tuple::swap (Tuple& other)
+    {
+        myHandle.swap(other.myHandle);
     }
 
     Tuple::size_type Tuple::size () const
     {
         return (::PyTuple_Size(handle()));
+    }
+
+    Tuple::operator Any () const
+    {
+        return (Any(myHandle));
     }
 
     Any Tuple::operator[] ( size_type i ) const
@@ -93,7 +108,7 @@ namespace py {
     {
     }
 
-    Tuple::Proxy& Tuple::Proxy::operator= ( const Object& object )
+    Tuple::Proxy& Tuple::Proxy::operator= (const Any& object)
     {
         ::store(myTuple->handle(), myIndex, object.handle());
         return (*this);

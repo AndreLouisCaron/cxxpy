@@ -7,6 +7,7 @@ set(headers
   Bytes.hpp
   Callable.hpp
   Error.hpp
+  Handle.hpp
   Int.hpp
   Interpreter.hpp
   Iterator.hpp
@@ -28,6 +29,7 @@ set(sources
   Bytes.cpp
   Callable.cpp
   Error.cpp
+  Handle.cpp
   Int.cpp
   Interpreter.cpp
   Iterator.cpp

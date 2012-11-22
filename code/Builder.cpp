@@ -15,6 +15,7 @@
 #include "Builder.hpp"
 #include "Error.hpp"
 #include <cstring>
+#include <iostream>
 
 namespace {
 
@@ -49,7 +50,7 @@ namespace {
 namespace py {
 
     ModuleBuilder::ModuleBuilder ( const Bytes& name )
-        : Module(acquire(::Py_InitModule(name.data(), NO_MODULE_METHODS)))
+        : Module(share(::Py_InitModule(name.data(), NO_MODULE_METHODS)))
     {
     }
 
@@ -110,25 +111,25 @@ namespace py {
     }
 
     ClassBuilder::ClassBuilder ( const Bytes& name, const Map& symbols )
-        : Object(acquire(::PyClass_New(0, symbols.handle(), name.handle())))
+        : Object(share(::PyClass_New(0, symbols.handle(), name.handle())))
     {
     }
 
     Map ClassBuilder::symbols () const
     {
-        return (Map(acquire(::getclasssymbols(handle()))));
+        return (Map(share(::getclasssymbols(handle()))));
     }
 
     void ClassBuilder::add ( Method definition )
     {
           // Create code object for function.
-        const Object function(Object::acquire(
+        const Object function(share(
             ::PyCFunction_New(&definition.data(), 0)));
           // Create a class method with the function.
-        const Object method(Object::acquire(
+        const Object method(share(
             ::PyMethod_New(function.handle(), 0, handle())));
           // Register method in class dictionary.
-        symbols().put(definition.name(), method);
+        symbols().put(Any(definition.name()), method);
     }
 
     Object ClassBuilder::operator() () const
@@ -137,7 +138,7 @@ namespace py {
         if ( result == 0 ) {
             Error::translate();
         }
-        return (Object(acquire(result)));
+        return (Object(share(result)));
     }
 
     Object ClassBuilder::operator() ( const Tuple& args ) const
@@ -146,7 +147,7 @@ namespace py {
         if ( result == 0 ) {
             Error::translate();
         }
-        return (Object(acquire(result)));
+        return (Object(share(result)));
     }
 
     Object ClassBuilder::operator() ( const Tuple& args, const Map& kwds ) const
@@ -156,20 +157,20 @@ namespace py {
         if ( result == 0 ) {
             Error::translate();
         }
-        return (Object(acquire(result)));
+        return (Object(share(result)));
     }
 
-    void * TypeBuilder::get_baton ( Object object )
+    void * TypeBuilder::get_baton (const Object& object)
     {
         ::BASIC_OBJECT *const self =
-            reinterpret_cast<::BASIC_OBJECT*>(object.handle());
+            reinterpret_cast<::BASIC_OBJECT*>(object.handle().data());
         return (self->baton);
     }
 
-    void TypeBuilder::set_baton ( Object object, void * baton )
+    void TypeBuilder::set_baton (Object& object, void * baton)
     {
         ::BASIC_OBJECT *const self =
-            reinterpret_cast<::BASIC_OBJECT*>(object.handle());
+            reinterpret_cast<::BASIC_OBJECT*>(object.handle().data());
         self->baton = baton;
     }
 
@@ -235,7 +236,7 @@ namespace py {
         if ( result == 0 ) {
             Error::translate();
         }
-        Object object(result);
+        Object object(share(result));
         
           // Initialize.
         if ( myData.tp_init )
