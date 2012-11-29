@@ -15,6 +15,7 @@
 #include "Iterator.hpp"
 #include "Error.hpp"
 #include "List.hpp"
+#include "None.hpp"
 
 namespace {
 
@@ -41,38 +42,54 @@ namespace py {
     }
 
     Iterator::Iterator ( const Handle& handle )
-        : Object(handle)
+        : myHandle(handle)
     {
     }
 
-    Iterator::Iterator ( const Any& iterator )
-        : Object(iterator.cast<Iterator>())
+    Iterator::Iterator ( const Any& object )
+        : myHandle(check<Iterator>(object.handle()))
     {
     }
 
     Iterator::Iterator ( const List& list )
-        : Object(::getiterator(list.handle()))
+        : myHandle(::getiterator(list.handle()))
     {
     }
 
     Iterator::Iterator ( const Tuple& iterable )
-        : Object(::getiterator(iterable.handle()))
+        : myHandle(::getiterator(iterable.handle()))
     {
+    }
+
+    const Handle& Iterator::handle () const
+    {
+        return (myHandle);
+    }
+
+    void Iterator::swap(Iterator& other)
+    {
+        myHandle.swap(other.myHandle);
     }
 
     bool Iterator::next ()
     {
-        ::PyObject *const result = ::PyIter_Next(handle());
+        ::PyObject *const result = ::PyIter_Next(myHandle);
         if ( result == 0 ) {
             // Means "end of sequence".  Could it also be an error?
             return false;
         }
-        return (myItem = Any(share(result)));
+        myItem = Any(share(result));
+        return (myItem.handle() != None());
     }
 
     Any Iterator::item () const
     {
         return (myItem);
+    }
+
+    Iterator::operator Any () const
+    {
+        return (Any(myHandle));
     }
 
 }

@@ -35,6 +35,11 @@ namespace py {
         return (myHandle);
     }
 
+    void Object::swap(Object& other)
+    {
+        std::swap(myHandle, other.myHandle);
+    }
+
     const Type Object::type () const
     {
         ::PyObject *const result = ::PyObject_Type(handle());
@@ -62,16 +67,16 @@ namespace py {
         return (Map(steal(result)));
     }
 
-    void Object::swap (Object& rhs)
-    {
-        std::swap(myHandle, rhs.myHandle);
-    }
-
     Handle Object::release ()
     {
         const Handle handle = myHandle;
         myHandle.free();
         return (handle);
+    }
+
+    Object::operator Any () const
+    {
+        return (Any(myHandle));
     }
 
     Object::operator bool () const

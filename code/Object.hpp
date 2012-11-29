@@ -9,8 +9,7 @@
 // "http://www.opensource.org/licenses/mit".
 
 #include <python.h>
-#include <typeinfo>
-
+#include "Any.hpp"
 #include "Handle.hpp"
 
 namespace py {
@@ -32,11 +31,13 @@ namespace py {
         Object ();
         Object (const Handle& handle);
         Object (const Object& other);
+        Object (const Any& object);
         ~Object ();
 
         /* methods. */
     public:
         const Handle& handle () const;
+        void swap(Object& other);
 
         const Type type () const;
         const size_t size () const;
@@ -45,37 +46,13 @@ namespace py {
 
         Handle release ();
 
-    protected:
-        void swap (Object& rhs);
-
         /* operators. */
-    private:
-        // Prohibited.  Leads to errors in class hierarchy (allows
-        // copy from an unrelated object also derived from Object).
-        Object& operator= (const Object&);
-
     public:
+        operator Any () const;
+
         operator bool () const;
         bool operator! () const;
     };
-
-    template<typename T>
-    bool is_a (const Handle& handle)
-    {
-        return (!handle || T::is_a(handle));
-    }
-
-    template<typename T>
-    Handle check (const Handle& handle)
-    {
-        if (!handle) {
-            return (handle);
-        }
-        if (!is_a<T>(handle)) {
-            throw (std::bad_cast());
-        }
-        return (handle);
-    }
 
 }
 

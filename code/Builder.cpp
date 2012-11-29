@@ -110,50 +110,57 @@ namespace py {
         return (myName);
     }
 
-    ClassBuilder::ClassBuilder ( const Bytes& name, const Map& symbols )
-        : Object(share(::PyClass_New(0, symbols.handle(), name.handle())))
+    Class::Class ( const Bytes& name, const Map& symbols )
+        : myHandle(share(::PyClass_New(0, symbols.handle(), name.handle())))
     {
     }
 
-    Map ClassBuilder::symbols () const
+    Class::Class ( const Bytes& name, const Map& symbols, const Tuple& bases )
+        : myHandle(share(::PyClass_New(bases.handle(),
+                                       symbols.handle(),
+                                       name.handle())))
     {
-        return (Map(share(::getclasssymbols(handle()))));
     }
 
-    void ClassBuilder::add ( Method definition )
+    Map Class::symbols () const
+    {
+        return (Map(share(::getclasssymbols(myHandle))));
+    }
+
+    void Class::add ( Method definition )
     {
           // Create code object for function.
-        const Object function(share(
+        const Any function(share(
             ::PyCFunction_New(&definition.data(), 0)));
           // Create a class method with the function.
-        const Object method(share(
-            ::PyMethod_New(function.handle(), 0, handle())));
+        const Any method(share(
+            ::PyMethod_New(function.handle(), 0, myHandle)));
           // Register method in class dictionary.
         symbols().put(Any(definition.name()), method);
     }
 
-    Object ClassBuilder::operator() () const
+    Object Class::operator() () const
     {
-        ::PyObject *const result = ::PyInstance_New(handle(), 0, 0);
+        ::PyObject *const result = ::PyInstance_New(myHandle, 0, 0);
         if ( result == 0 ) {
             Error::translate();
         }
         return (Object(share(result)));
     }
 
-    Object ClassBuilder::operator() ( const Tuple& args ) const
+    Object Class::operator() ( const Tuple& args ) const
     {
-        ::PyObject *const result = ::PyInstance_New(handle(), args.handle(), 0);
+        ::PyObject *const result = ::PyInstance_New(myHandle, args.handle(), 0);
         if ( result == 0 ) {
             Error::translate();
         }
         return (Object(share(result)));
     }
 
-    Object ClassBuilder::operator() ( const Tuple& args, const Map& kwds ) const
+    Object Class::operator() ( const Tuple& args, const Map& kwds ) const
     {
         ::PyObject *const result =
-            ::PyInstance_New(handle(), args.handle(), kwds.handle());
+            ::PyInstance_New(myHandle, args.handle(), kwds.handle());
         if ( result == 0 ) {
             Error::translate();
         }
@@ -250,7 +257,7 @@ namespace py {
         set_baton(object, 0);
         
           // Finish.
-        return (object);
+        return (Object(object));
     }
 
 }

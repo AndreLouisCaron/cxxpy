@@ -9,28 +9,38 @@
 // "http://www.opensource.org/licenses/mit".
 
 #include <python.h>
-#include "Object.hpp"
+#include "Any.hpp"
 
 namespace py {
 
       /*!
        * @brief Run-time type information.
        */
-    class Type :
-        public Object
+    class Type
     {
         /* class methods. */
     public:
-        static bool Type::isa ( const Object& object );
+        static bool Type::is_a ( const Handle& handle );
+
+        /* data. */
+    private:
+        Handle myHandle;
 
         /* construction. */
     public:
-        Type (const Handle& handle);
-        explicit Type ( const Object& object );
+        explicit Type (const Handle& handle);
+        Type ( const Any& object );
 
         /* methods. */
     public:
+        const Handle& handle () const;
+        void swap(Type& other);
+
         bool subtypeof ( const Type& other ) const;
+
+        /* operators. */
+    public:
+        operator Any () const;
     };
 
 }

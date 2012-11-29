@@ -9,19 +9,29 @@
 
 namespace py {
 
-    bool Type::isa ( const Object& object )
+    bool Type::is_a ( const Handle& handle )
     {
-        return (PyType_Check(object.handle()) != 0);
+        return (PyType_Check(handle) != 0);
     }
 
     Type::Type (const Handle& handle)
-        : Object(handle)
+        : myHandle(handle)
     {
     }
 
-    Type::Type ( const Object& object )
-        : Object(object.handle())
+    Type::Type ( const Any& object )
+        : myHandle(object.handle())
     {
+    }
+
+    const Handle& Type::handle () const
+    {
+        return (myHandle);
+    }
+
+    void Type::swap(Type& other)
+    {
+        myHandle.swap(other.myHandle);
     }
 
     bool Type::subtypeof ( const Type& other ) const
@@ -29,6 +39,11 @@ namespace py {
         return (::PyType_IsSubtype(
                     (::PyTypeObject*)handle().data(),
                     (::PyTypeObject*)other.handle().data()) != 0);
+    }
+
+    Type::operator Any () const
+    {
+        return (Any(myHandle));
     }
 
 }

@@ -10,7 +10,7 @@
 
 #include <python.h>
 #include <string>
-#include "Object.hpp"
+#include "Any.hpp"
 #include "Map.hpp"
 
 namespace py {
@@ -18,8 +18,7 @@ namespace py {
       /*!
        * @brief Python code module (".py" file).
        */
-    class Module :
-        public Object
+    class Module
     {
         /* nested types. */
     public:
@@ -29,17 +28,28 @@ namespace py {
     public:
         static Module load ( const std::string& name, const std::string& path );
 
+        /* data. */
+    private:
+        Handle myHandle;
+
         /* construction. */
     public:
         explicit Module (const Handle& handle);
-        explicit Module (const Object& object);
+        explicit Module (const Any& object);
 
         /* methods. */
     public:
+        const Handle& handle () const;
+        void swap(Module& module);
+
         const Map symbols () const;
-        Object symbol (const std::string& name) const;
+        Any symbol (const std::string& name) const;
 
         Module reload ();
+
+        /* operators. */
+    public:
+        operator Any () const;
     };
 
     class Module::Lock

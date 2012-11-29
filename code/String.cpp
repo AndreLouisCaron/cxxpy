@@ -86,7 +86,7 @@ namespace py {
 
     String::operator Any () const
     {
-        return (myHandle);
+        return (Any(myHandle));
     }
 
     String::operator std::wstring () const

@@ -38,17 +38,15 @@ namespace py {
        *  }
        * @endcode
        */
-    class Iterator :
-        public Object
+    class Iterator
     {
-    friend class Any;
-
         /* class methods. */
     public:
         static bool is_a ( const Handle& handle );
 
         /* data. */
     private:
+        Handle myHandle;
         Any myItem;
 
         /* construction. */
@@ -69,7 +67,7 @@ namespace py {
            * @brief Cast an existing object to an iterator instance.
            * @param iterator Object wrapping an iterator instance.
            */
-        explicit Iterator ( const Any& iterator );
+        explicit Iterator ( const Any& object );
 
           /*!
            * @brief Get an iterator to process @a iterable.
@@ -83,6 +81,9 @@ namespace py {
 
         /* methods. */
     public:
+        const Handle& handle () const;
+        void swap(Iterator& other);
+
           /*!
            * @brief Advance to the next item in the sequence.
            * @return @c true if @c item() can be called safely, @c false if we
@@ -100,6 +101,10 @@ namespace py {
            * return the same object until @c next() is called again.
            */
         Any item () const;
+
+        /* operators. */
+    public:
+        operator Any () const;
     };
 
 }

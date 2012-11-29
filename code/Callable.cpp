@@ -38,34 +38,49 @@ namespace {
 
 namespace py {
 
-    bool Callable::isa (const Object& object)
+    bool Callable::is_a (const Handle& handle)
     {
-        return (::PyCallable_Check(object.handle()) != 0);
-    }
-
-    Callable::Callable (const Object& object)
-        : Object(object.handle())
-    {
+        return (::PyCallable_Check(handle) != 0);
     }
 
     Callable::Callable (const Handle& handle)
-        : Object(handle)
+        : myHandle(check<Callable>(handle))
     {
     }
 
-    Object Callable::operator() ( const Tuple& pargs ) const
+    Callable::Callable (const Any& object)
+        : myHandle(check<Callable>(object.handle()))
     {
-        return (Object(::invoke(handle(), pargs.handle(), 0)));
     }
 
-    Object Callable::operator() ( const Tuple& pargs, const Map& nargs ) const
+    const Handle& Callable::handle () const
     {
-        return (Object(::invoke(handle(), pargs.handle(), nargs.handle())));
+        return (myHandle);
     }
 
-    Object Callable::operator() ( const Map& nargs ) const
+    void Callable::swap(Callable& other)
     {
-        return (Object(::invoke(handle(), 0, nargs.handle())));
+        myHandle.swap(other.myHandle);
+    }
+
+    Callable::operator Any () const
+    {
+        return (Any(myHandle));
+    }
+
+    Any Callable::operator() ( const Tuple& pargs ) const
+    {
+        return (Any(::invoke(handle(), pargs.handle(), 0)));
+    }
+
+    Any Callable::operator() ( const Tuple& pargs, const Map& nargs ) const
+    {
+        return (Any(::invoke(handle(), pargs.handle(), nargs.handle())));
+    }
+
+    Any Callable::operator() ( const Map& nargs ) const
+    {
+        return (Any(::invoke(handle(), 0, nargs.handle())));
     }
 
 }

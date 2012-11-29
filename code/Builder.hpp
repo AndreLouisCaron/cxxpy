@@ -62,12 +62,16 @@ namespace py {
         const Bytes& name () const;
     };
 
-    class ClassBuilder :
-        public Object
+    class Class
     {
+        /* data. */
+    private:
+        Handle myHandle;
+
         /* construction. */
     public:
-        ClassBuilder ( const Bytes& name, const Map& symbols );
+        Class ( const Bytes& name, const Map& symbols );
+        Class ( const Bytes& name, const Map& symbols, const Tuple& bases );
 
         /* methods. */
     public:
@@ -77,8 +81,25 @@ namespace py {
 
         /* operators. */
     public:
+        /*!
+         * @brief Create an instance using the default constructor.
+         * @return A new instance of the class.
+         */
         Object operator() () const;
+
+        /*!
+         * @brief Create an instance using @a args.
+         * @param args Positional argument passed to @c __init__().
+         * @return A new instance of the class.
+         */
         Object operator() ( const Tuple& args ) const;
+
+        /*!
+         * @brief Create an instance using @a args and @a kwds.
+         * @param args Positional argument passed to @c __init__().
+         * @param kwds Keyword argument passed to @c __init__().
+         * @return A new instance of the class.
+         */
         Object operator() ( const Tuple& args, const Map& kwds ) const;
     };
 

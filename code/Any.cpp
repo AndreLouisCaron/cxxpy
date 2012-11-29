@@ -13,22 +13,35 @@
  */
 
 #include "Any.hpp"
+#include <algorithm>
 
 namespace py {
 
-    Any::Any ( const Handle& handle )
-        : Object(handle)
-    {
-    }
-
     Any::Any ()
-        : Object()
+        : myHandle()
     {
     }
 
-    Any::Any ( const Object& object )
-        : Object(object)
+    Any::Any ( const Handle& handle )
+        : myHandle(handle)
     {
+    }
+
+    const Handle& Any::handle () const
+    {
+        return (myHandle);
+    }
+
+    void Any::swap(Any& other)
+    {
+        std::swap(myHandle, other.myHandle);
+    }
+
+    Handle Any::release ()
+    {
+        const Handle handle = myHandle;
+        myHandle.free();
+        return (handle);
     }
 
     Any& Any::operator= ( const Any& object )

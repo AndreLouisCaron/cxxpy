@@ -9,7 +9,6 @@
 // "http://www.opensource.org/licenses/mit".
 
 #include <python.h>
-#include "Object.hpp"
 #include "Tuple.hpp"
 #include "Map.hpp"
 
@@ -18,23 +17,33 @@ namespace py {
     /*!
      * @brief Function, bound method, function object, etc.
      */
-    class Callable :
-        public Object
+    class Callable
     {
         /* class methods. */
     public:
-        static bool isa (const Object& object);
+        static bool is_a (const Handle& handle);
+
+        /* data. */
+    private:
+        Handle myHandle;
 
         /* construction. */
     public:
-        explicit Callable (const Object& object);
         explicit Callable (const Handle& handle);
+        Callable (const Any& object);
+
+        /* methods. */
+    public:
+        const Handle& handle () const;
+        void swap(Callable& other);
 
         /* operators. */
     public:
-        Object operator() (const Tuple& pargs) const;
-        Object operator() (const Tuple& pargs, const Map& nargs) const;
-        Object operator() (const Map& nargs) const;
+        operator Any () const;
+
+        Any operator() (const Tuple& pargs) const;
+        Any operator() (const Tuple& pargs, const Map& nargs) const;
+        Any operator() (const Map& nargs) const;
     };
 
 }

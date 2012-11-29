@@ -258,12 +258,12 @@ namespace exports {
 
     py::Any iter ( py::Object self )
     {
-        return (self);
+        return (py::Any(self.handle()));
     }
 
     py::Any next ( py::Object self )
     {
-        const py::Object line = readline(self);
+        const py::Any line = readline(self);
         if (line.handle() == py::None()) {
             return (py::Any());
         }

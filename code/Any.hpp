@@ -15,23 +15,30 @@
  * @brief Variant type, can contain "any" python object.
  */
 
-#include "Object.hpp"
 #include <python.h>
+#include <exception>
+#include "Handle.hpp"
 
 namespace py {
 
-    class Any :
-        public Object
+    class Any
     {
+        /* data. */
+    protected:
+        Handle myHandle;
+
         /* construction. */
     public:
-        explicit Any ( const Handle& handle );
-
         Any ();
-        Any ( const Object& object );
+        explicit Any ( const Handle& handle );
 
         /* methods. */
     public:
+        const Handle& handle () const;
+        void swap(Any& other);
+
+        Handle release ();
+
         template<typename T> bool is_a () const;
 
         template<typename T> T cast () const;
@@ -59,6 +66,24 @@ namespace py {
     T Any::cast () const
     {
         return (T(check<T>(handle())));
+    }
+
+    template<typename T>
+    bool is_a (const Handle& handle)
+    {
+        return (!handle || T::is_a(handle));
+    }
+
+    template<typename T>
+    Handle check (const Handle& handle)
+    {
+        if (!handle) {
+            return (handle);
+        }
+        if (!is_a<T>(handle)) {
+            throw (bad_cast());
+        }
+        return (handle);
     }
 
     template<typename T>

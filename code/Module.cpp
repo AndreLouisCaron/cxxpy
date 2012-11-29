@@ -42,7 +42,7 @@ namespace py {
         arguments[0] = Bytes(data);
         arguments[1] = Bytes(path);
         arguments[2] = Bytes(mode);
-        Object code = compile(arguments);
+        Any code = compile(arguments);
           // Build a module out of the code object.
         ::PyObject *const result = ::PyImport_ExecCodeModule(
             const_cast<char*>(name.c_str()), code.handle());
@@ -54,13 +54,23 @@ namespace py {
     }
 
     Module::Module (const Handle& handle)
-        : Object(handle)
+        : myHandle(handle)
     {
     }
 
-    Module::Module ( const Object& object )
-        : Object(object.handle())
+    Module::Module ( const Any& object )
+        : myHandle(object.handle())
     {
+    }
+
+    const Handle& Module::handle () const
+    {
+        return (myHandle);
+    }
+
+    void Module::swap(Module& other)
+    {
+        std::swap(myHandle, other.myHandle);
     }
 
     const Map Module::symbols () const
@@ -72,7 +82,7 @@ namespace py {
         return (Map(share(result)));
     }
 
-    Object Module::symbol ( const std::string& name ) const
+    Any Module::symbol ( const std::string& name ) const
     {
         return (symbols().get(name));
     }
@@ -80,6 +90,11 @@ namespace py {
     Module Module::reload ()
     {
         return (Module(share(::PyImport_ReloadModule(handle()))));
+    }
+
+    Module::operator Any () const
+    {
+        return (Any(myHandle));
     }
 
     Module::Lock::Lock ()
